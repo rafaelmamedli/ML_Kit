@@ -1,14 +1,13 @@
 package com.rafael.mlkit
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
+import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -19,18 +18,15 @@ import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import java.lang.Exception
-import android.net.Uri
-import android.provider.Settings
 import com.rafael.mlkit.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val CAMERA_PERMISSION_CODE = 123
-    private val STORAGE_PERMISSION_CODE = 1
-
-
+    companion object{
+        const val PERMISSION_REQUEST_CODE = 1001
+    }
     private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
 
@@ -74,24 +70,13 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.button.setOnClickListener {
-            val options = arrayOf("Camera", "Gallery")
-            val builder = AlertDialog.Builder(this@MainActivity)
-            builder.setTitle("Pick a option")
-            builder.setItems(options, DialogInterface.OnClickListener { dialog, which ->
-                if (which == 0) {
-                    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    cameraLauncher.launch(cameraIntent)
-                } else {
-                    val storageIntent = Intent()
-                    storageIntent.type = "image/*"
-                    storageIntent.action = Intent.ACTION_GET_CONTENT
-                    galleryLauncher.launch(storageIntent)
-                }
-            })
-
-            builder.show()
-
+            if (arePermissionsGranted()) {
+                showOptionsDialog()
+            } else {
+                requestPermissions()
+            }
         }
+
     }
 
 
@@ -116,74 +101,69 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-      //  checkPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE)
+    private val permissions = arrayOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.READ_EXTERNAL_STORAGE
+    )
+
+
+
+    private fun arePermissionsGranted(): Boolean {
+        for (permission in permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun requestPermissions() {
+        ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE)
+    }
+
+    private fun showOptionsDialog() {
+        val options = arrayOf("Camera", "Gallery")
+        val builder = AlertDialog.Builder(this@MainActivity)
+        builder.setTitle("Pick an option")
+        builder.setItems(options) { dialog, which ->
+            if (which == 0) {
+                val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                cameraLauncher.launch(cameraIntent)
+            } else {
+                val storageIntent = Intent()
+                storageIntent.type = "image/*"
+                storageIntent.action = Intent.ACTION_GET_CONTENT
+                galleryLauncher.launch(storageIntent)
+            }
+        }
+        builder.show()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            var allPermissionsGranted = true
+            for (result in grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allPermissionsGranted = false
+                    break
+                }
+            }
+            if (allPermissionsGranted) {
+                showOptionsDialog()
+            } else {
+            }
+        }
     }
 
 
-    private fun checkPermission(permission: String, requestCode: Int) {
-//        if (ContextCompat.checkSelfPermission(
-//                this@MainActivity,
-//                permission
-//            ) == PackageManager.PERMISSION_DENIED
-//        ) {
-//            val rationale = when (permission) {
-//                android.Manifest.permission.CAMERA -> "Permission is required to access the camera"
-//                android.Manifest.permission.READ_EXTERNAL_STORAGE -> "Access to storage requires permission."
-//                else -> ""
-//            }
-//            if (shouldShowRequestPermissionRationale(permission)) {
-//                AlertDialog.Builder(this@MainActivity)
-//                    .setTitle("Permission needed")
-//                    .setMessage(rationale)
-//                    .setPositiveButton("Ok") { _, _ ->
-//                        ActivityCompat.requestPermissions(
-//                            this@MainActivity,
-//                            arrayOf(permission),
-//                            requestCode
-//                        )
-//                    }
-//                    .setNegativeButton("Cancel") { dialog, _ ->
-//                        dialog.dismiss()
-//                    }
-//                    .create()
-//                    .show()
-//            } else {
-//                ActivityCompat.requestPermissions(
-//                    this@MainActivity,
-//                    arrayOf(permission),
-//                    requestCode
-//                )
-//            }
-//        } else {
-//        }
-    }
-
-
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<out String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-////
-////        if (requestCode == CAMERA_PERMISSION_CODE) {
-////            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-////            }
-////        }
-////        if (requestCode == STORAGE_PERMISSION_CODE) {
-////            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-////            }
-////        }
-//    }
 
 
     private fun openAppSettings() {
-//        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-//
-//        val uri = Uri.fromParts("package", packageName, null)
-//        intent.data = uri
-//        startActivity(intent)
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+
+        val uri = Uri.fromParts("package", packageName, null)
+        intent.data = uri
+        startActivity(intent)
     }
 }
