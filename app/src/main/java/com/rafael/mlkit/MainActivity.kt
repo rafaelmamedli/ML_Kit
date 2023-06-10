@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -128,17 +129,6 @@ class MainActivity : AppCompatActivity() {
         android.Manifest.permission.READ_EXTERNAL_STORAGE
     )
 
-
-
-    private fun arePermissionsGranted(): Boolean {
-        for (permission in permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                return false
-            }
-        }
-        return true
-    }
-
     private fun hasCameraPermission(): Boolean {
         return ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
     }
@@ -174,14 +164,13 @@ class MainActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera()
                 } else {
-                    Toast.makeText(this, "Permission denied for Camera", Toast.LENGTH_SHORT).show()
                 }
             }
             PERMISSION_REQUEST_STORAGE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openGallery()
                 } else {
-                    Toast.makeText(this, "Permission denied for Media", Toast.LENGTH_SHORT).show()
+                    Log.d("TAG","Permission denied for Media")
                 }
             }
         }
