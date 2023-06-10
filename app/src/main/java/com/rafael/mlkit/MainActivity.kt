@@ -3,13 +3,10 @@ package com.rafael.mlkit
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -94,24 +91,23 @@ class MainActivity : AppCompatActivity() {
                 binding.tvResult.text = result
             }.addOnCanceledListener {
             }
-        } else {
         }
     }
 
     private fun showOptionsDialog() {
-        val options = arrayOf("Camera", "Gallery")
+        val options = arrayOf("Gallery", "Camera")
         val builder = AlertDialog.Builder(this@MainActivity)
         builder.setTitle("Pick an option")
         builder.setItems(options) { dialog, which ->
             when (which) {
-                0 -> {
+                1 -> {
                     if (hasCameraPermission()) {
                         openCamera()
                     } else {
                         requestCameraPermission()
                     }
                 }
-                1 -> {
+                0 -> {
                     if (hasStoragePermission()) {
                         openGallery()
                     } else {
@@ -123,11 +119,6 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
-
-    private val permissions = arrayOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.READ_EXTERNAL_STORAGE
-    )
 
     private fun hasCameraPermission(): Boolean {
         return ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
@@ -164,6 +155,8 @@ class MainActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera()
                 } else {
+                    Log.d("TAG","Permission denied for Camera")
+
                 }
             }
             PERMISSION_REQUEST_STORAGE -> {
