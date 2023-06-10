@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "496962660230",
+    "project_id": "ml-kit-4be9c",
+    "storage_bucket": "ml-kit-4be9c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496962660230:android:bc6183a1ceb7f0f7f6ae07",
+        "android_client_info": {
+          "package_name": "com.rafael.mlkit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "496962660230-kl9vrvdcrsv73c0ujg2bid15sts3o2cd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5fxxIh_UBdwZXu4JYJDaVNx3FjbdnJQA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "496962660230-kl9vrvdcrsv73c0ujg2bid15sts3o2cd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
